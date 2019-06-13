@@ -4,12 +4,19 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
+
+import androidx.core.content.res.ResourcesCompat;
+
+import java.io.ByteArrayOutputStream;
 
 public final class SenderService extends Service {
 
@@ -35,6 +42,8 @@ public final class SenderService extends Service {
                     final Bundle bundle = new Bundle();
                     bundle.putLong("long", 23L);
                     bundle.putString("str", "!!!String!!!");
+                    final byte[] bArray = getByteArrayFromResouces();
+                    bundle.putByteArray("image", bArray);
                     msg.setData(bundle);
                     try {
                         synchronized (lock) {
@@ -47,6 +56,14 @@ public final class SenderService extends Service {
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
+                }
+
+                private byte[] getByteArrayFromResouces () {
+                    final BitmapDrawable drawable = (BitmapDrawable) ResourcesCompat.getDrawable(SenderService.this.getResources(), R.drawable.scape, null);
+                    final Bitmap bitmap = drawable.getBitmap();
+                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                    return baos.toByteArray();
                 }
             };
             new Thread(r).start();
